@@ -9,96 +9,76 @@
     body {
       margin: 0;
       background: #000;
-      overflow: auto;
       display: flex;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
     }
 
     .wrapper {
       position: relative;
-      width: 1024px; /* keep original resolution */
+      width: 1024px;
       height: 1792px;
+      transform-origin: top center;
     }
 
     .background {
-      position: absolute;
       width: 100%;
       height: 100%;
+      position: absolute;
       top: 0;
       left: 0;
     }
 
-    /* ===== Realistic Candle Flame ===== */
-    .candle {
-      position: absolute;
-      width: 20px;
-      height: 40px;
-      pointer-events: none;
-    }
-
+    /* Flame */
     .flame {
       position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
       width: 14px;
       height: 28px;
-      background: radial-gradient(ellipse at center, #fff 0%, #ffd27a 40%, #ff8c00 70%, rgba(255,140,0,0) 100%);
-      border-radius: 50% 50% 50% 50%;
-      filter: blur(0.5px);
-      animation: flameFlicker 0.8s infinite ease-in-out alternate;
-    }
-
-    .flame::after {
-      content: '';
-      position: absolute;
-      top: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 6px;
-      height: 14px;
-      background: radial-gradient(circle, #fff 0%, #ffe9a8 60%, transparent 100%);
+      background: radial-gradient(ellipse at center, #fff 0%, #ffd27a 40%, #ff8c00 70%, transparent 100%);
       border-radius: 50%;
-      opacity: 0.9;
-    }
-
-    @keyframes flameFlicker {
-      0% { transform: translateX(-50%) scale(1) rotate(-1deg); }
-      50% { transform: translateX(-50%) scale(1.15) rotate(2deg); }
-      100% { transform: translateX(-50%) scale(0.9) rotate(-2deg); }
-    }
-
-    /* Glow around flame */
-    .glow {
-      position: absolute;
-      width: 90px;
-      height: 90px;
-      background: radial-gradient(circle, rgba(255,180,80,0.8) 0%, rgba(255,140,0,0.4) 40%, transparent 70%);
-      border-radius: 50%;
-      animation: glowPulse 1.5s infinite ease-in-out alternate;
+      transform-origin: center bottom;
+      animation: flame 0.9s infinite ease-in-out alternate;
       mix-blend-mode: screen;
     }
 
-    @keyframes glowPulse {
+    @keyframes flame {
+      0% { transform: scale(1) rotate(-2deg); }
+      50% { transform: scale(1.2) rotate(2deg); }
+      100% { transform: scale(0.9) rotate(-1deg); }
+    }
+
+    /* Glow */
+    .glow {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background: radial-gradient(circle, rgba(255,180,80,0.8) 0%, rgba(255,140,0,0.3) 50%, transparent 80%);
+      border-radius: 50%;
+      animation: glow 1.5s infinite alternate ease-in-out;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes glow {
       0% { opacity: 0.6; transform: scale(0.9); }
       100% { opacity: 1; transform: scale(1.2); }
     }
 
-    /* Sun rays */
-    .sun-rays {
+    /* Sun */
+    .sun {
       position: absolute;
-      top: 620px;
-      right: 90px;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(255,220,150,0.7) 0%, rgba(255,200,120,0.3) 40%, transparent 70%);
-      animation: sunPulse 6s infinite ease-in-out;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255,220,150,0.7) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: sun 6s infinite ease-in-out;
       mix-blend-mode: screen;
     }
 
-    @keyframes sunPulse {
+    @keyframes sun {
       0% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.3); opacity: 0.85; }
+      50% { transform: scale(1.3); opacity: 0.8; }
       100% { transform: scale(1); opacity: 0.5; }
     }
 
@@ -106,37 +86,52 @@
 </head>
 
 <body>
-  <div class="wrapper">
+  <div class="wrapper" id="wrapper">
 
     <img src="Invitation_1.jpeg" class="background" />
 
-    <!-- Sun effect -->
-    <div class="sun-rays"></div>
+    <!-- Sun aligned -->
+    <div class="sun" style="top: 640px; right: 110px;"></div>
 
-    <!-- Candle 1 -->
-    <div class="candle" style="bottom: 270px; left: 135px;">
-      <div class="flame"></div>
-      <div class="glow" style="top: -30px; left: -35px;"></div>
-    </div>
+    <!-- LEFT candles (precisely aligned) -->
+    <div class="flame" style="left: 150px; bottom: 300px;"></div>
+    <div class="glow" style="left: 135px; bottom: 290px;"></div>
 
-    <!-- Candle 2 -->
-    <div class="candle" style="bottom: 250px; left: 215px;">
-      <div class="flame"></div>
-      <div class="glow" style="top: -30px; left: -35px;"></div>
-    </div>
+    <div class="flame" style="left: 220px; bottom: 320px;"></div>
+    <div class="glow" style="left: 205px; bottom: 310px;"></div>
 
-    <!-- Candle 3 -->
-    <div class="candle" style="bottom: 260px; right: 175px;">
-      <div class="flame"></div>
-      <div class="glow" style="top: -30px; left: -35px;"></div>
-    </div>
+    <!-- RIGHT candles -->
+    <div class="flame" style="right: 180px; bottom: 300px;"></div>
+    <div class="glow" style="right: 165px; bottom: 290px;"></div>
 
-    <!-- Candle 4 -->
-    <div class="candle" style="bottom: 240px; right: 255px;">
-      <div class="flame"></div>
-      <div class="glow" style="top: -30px; left: -35px;"></div>
-    </div>
+    <div class="flame" style="right: 250px; bottom: 330px;"></div>
+    <div class="glow" style="right: 235px; bottom: 320px;"></div>
 
   </div>
+
+  <script>
+    function scaleToFit() {
+      const wrapper = document.getElementById('wrapper');
+      const imgWidth = 1024;
+      const imgHeight = 1792;
+
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      const scaleX = screenWidth / imgWidth;
+      const scaleY = screenHeight / imgHeight;
+      const scale = Math.min(scaleX, scaleY);
+
+      if (scale < 1) {
+        wrapper.style.transform = `scale(${scale})`;
+      } else {
+        wrapper.style.transform = "scale(1)";
+      }
+    }
+
+    window.addEventListener('resize', scaleToFit);
+    window.addEventListener('load', scaleToFit);
+  </script>
+
 </body>
 </html>
