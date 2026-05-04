@@ -7,6 +7,7 @@
     <style>
         :root {
             --bg-color: #f6f1e7; 
+            --flame-color: rgba(255, 200, 100, 0.8);
         }
 
         body, html {
@@ -21,7 +22,6 @@
             align-items: center;
         }
 
-        /* The Dust Overlay: Fixed to viewport so zoom doesn't affect it */
         #dust-canvas {
             position: fixed;
             top: 0;
@@ -29,17 +29,17 @@
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            z-index: 10; /* Keeps it on top of everything */
+            z-index: 20; 
         }
 
-        .invitation-wrapper {
+        .invitation-container {
             position: relative;
             max-width: 100%;
             max-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 10px 60px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 60px rgba(0,0,0,0.2);
         }
 
         .invitation-img {
@@ -49,47 +49,65 @@
             object-fit: contain;
         }
 
-        /* Flame Glows - scaled with the image container */
-        .glow-point {
+        /* Improved Flame Effect */
+        .flame {
             position: absolute;
-            width: 2%; 
-            height: 2%;
-            background: radial-gradient(circle, rgba(255,240,180,0.9) 0%, rgba(255,180,50,0) 70%);
-            filter: blur(4px);
-            animation: flicker 2s infinite ease-in-out;
+            width: 12px;
+            height: 18px;
+            background: radial-gradient(circle at bottom, var(--flame-color) 0%, rgba(255,255,255,0) 80%);
+            filter: blur(2px);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 1.5s infinite alternate ease-in-out;
             z-index: 5;
-            pointer-events: none;
         }
 
-        /* Adjusted positions for Invitation_1.jpeg */
-        .candle-1 { bottom: 13%; left: 18.5%; }
-        .candle-2 { bottom: 8.5%; left: 14.8%; }
-        .candle-3 { bottom: 16.5%; left: 18.2%; }
-        .candle-4 { bottom: 17.5%; right: 18.2%; }
-        .candle-5 { bottom: 9.5%; right: 21.2%; }
-        .candle-6 { bottom: 11.5%; right: 14%; }
+        /* Bright center of the flame to make it pop */
+        .flame::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+            box-shadow: 0 0 10px 2px #fffad1;
+        }
+
+        /* Precise positioning for the 6 candles in Invitation_1.jpeg */
+        .c1 { bottom: 18.2%; left: 18.3%; } /* Left middle */
+        .c2 { bottom: 10.3%; left: 14.5%; } /* Left bottom */
+        .c3 { bottom: 21.8%; left: 18%; }   /* Left top */
+        .c4 { bottom: 21.3%; right: 17.8%; } /* Right top */
+        .c5 { bottom: 10.8%; right: 20.8%; } /* Right bottom back */
+        .c6 { bottom: 12.8%; right: 13.5%; } /* Right bottom front */
 
         @keyframes flicker {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.4); opacity: 0.8; }
+            0% { transform: scale(0.9) rotate(-2deg); opacity: 0.7; }
+            20% { transform: scale(1.1) rotate(1deg); opacity: 1; }
+            40% { transform: scale(0.95) rotate(-1deg); opacity: 0.8; }
+            60% { transform: scale(1.05) rotate(2deg); opacity: 0.9; }
+            80% { transform: scale(1) rotate(-1deg); opacity: 1; }
+            100% { transform: scale(1.1) rotate(0deg); opacity: 0.8; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas is now outside the wrapper for global movement -->
     <canvas id="dust-canvas"></canvas>
 
-    <div class="invitation-wrapper">
+    <div class="invitation-container">
         <img src="Invitation_1.jpeg" alt="Wedding Invitation" class="invitation-img">
 
-        <!-- Glowing flames -->
-        <div class="glow-point candle-1"></div>
-        <div class="glow-point candle-2"></div>
-        <div class="glow-point candle-3"></div>
-        <div class="glow-point candle-4"></div>
-        <div class="glow-point candle-5"></div>
-        <div class="glow-point candle-6"></div>
+        <!-- Flame elements -->
+        <div class="flame c1"></div>
+        <div class="flame c2"></div>
+        <div class="flame c3"></div>
+        <div class="flame c4"></div>
+        <div class="flame c5"></div>
+        <div class="flame c6"></div>
     </div>
 
     <script>
@@ -97,8 +115,7 @@
         const ctx = canvas.getContext('2d');
 
         let particles = [];
-        // Increased count and changed size for better visibility
-        const particleCount = 60; 
+        const particleCount = 180; // Triple the density
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -116,18 +133,20 @@
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                // Larger particles
-                this.size = Math.random() * 2.5 + 0.8; 
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.3 + 0.1;
-                // Higher opacity range for "Golden Hour" feel
-                this.opacity = Math.random() * 0.6 + 0.2; 
-                this.color = `rgba(255, 245, 210, ${this.opacity})`;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.4 + 0.1;
+                this.opacity = Math.random() * 0.7 + 0.1;
+                this.shimmer = Math.random() * 0.05;
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
+                
+                // Add a slight shimmer effect
+                this.opacity += this.shimmer;
+                if (this.opacity > 0.8 || this.opacity < 0.1) this.shimmer *= -1;
 
                 if (this.y > canvas.height) this.y = -10;
                 if (this.x > canvas.width) this.x = 0;
@@ -135,9 +154,7 @@
             }
 
             draw() {
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = "white";
+                ctx.fillStyle = `rgba(255, 250, 220, ${this.opacity})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
