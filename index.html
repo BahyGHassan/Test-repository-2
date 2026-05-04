@@ -5,67 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wedding Invitation</title>
     <style>
+        :root {
+            --flame-color: #ff9d00;
+            --flame-light: #ffffff;
+        }
+
         body, html {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: #f6f1e7;
             display: flex; justify-content: center; align-items: center;
             overflow: hidden;
+            font-family: sans-serif;
         }
 
-        /* The Dust Overlay - Global */
+        /* Global Dust Overlay */
         #dust-canvas {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
             pointer-events: none; z-index: 100;
         }
 
-        /* Container that scales perfectly with the image */
-        .stage {
+        /* The Container: This ensures the image and flames scale as ONE unit */
+        .invitation-box {
             position: relative;
             display: inline-block;
-            line-height: 0; /* Removes bottom gap */
-            max-height: 95vh;
-            max-width: 95vw;
+            max-width: 100%;
+            max-height: 100vh;
         }
 
         .invitation-img {
-            max-height: 95vh;
-            max-width: 95vw;
             display: block;
+            max-width: 100%;
+            max-height: 100vh;
             object-fit: contain;
-            box-shadow: 0 20px 80px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
         }
 
-        /* The Flame Element */
-        .flame {
+        /* Flame Styling - High Visibility for Mobile */
+        .flame-wrapper {
             position: absolute;
-            width: 1.2%; /* Relative to image width */
-            height: 2.5%; /* Relative to image height */
-            background: #fff;
-            border-radius: 50% 50% 20% 20% / 80% 80% 20% 20%;
-            z-index: 10;
-            /* Multi-layered glow for high visibility */
-            box-shadow: 
-                0 0 10px #fff,
-                0 -5px 15px #ffcf54,
-                0 -10px 20px #ff8000;
-            filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
-            animation: move-flame 1s infinite alternate ease-in-out;
-            transform-origin: bottom;
+            width: 3%; /* Scales size relative to image width */
+            height: 5%;
+            transform: translate(-50%, -100%); /* Centers flame on the point */
+            z-index: 50;
+            pointer-events: none;
         }
 
-        /* Exact coordinates for image_486963.jpg */
-        .c1 { bottom: 18.2%; left: 18.2%; } 
-        .c2 { bottom: 10.4%; left: 14.5%; } 
-        .c3 { bottom: 21.6%; left: 18.1%; }
-        .c4 { bottom: 21.3%; right: 17.8%; }
-        .c5 { bottom: 10.8%; right: 20.8%; }
-        .c6 { bottom: 12.8%; right: 13.5%; }
+        .flame-core {
+            width: 100%; height: 100%;
+            background: var(--flame-light);
+            border-radius: 50% 50% 20% 20% / 80% 80% 20% 20%;
+            box-shadow: 
+                0 0 10px #fff, 
+                0 -2px 15px var(--flame-color), 
+                0 -5px 25px #ff5e00;
+            animation: flicker 0.15s infinite alternate;
+        }
 
-        @keyframes move-flame {
-            0% { transform: scaleY(1) rotate(-1deg); }
-            100% { transform: scaleY(1.2) rotate(1deg); }
+        /* Precise Positioning for invitation.jpg */
+        /* Left Group */
+        .c1 { top: 78.5%; left: 17.6%; } /* Middle candle left */
+        .c2 { top: 89.8%; left: 14.3%; } /* Bottom candle left */
+        .c3 { top: 71.8%; left: 17.5%; } /* Top candle left */
+        
+        /* Right Group */
+        .c4 { top: 72.8%; left: 82.2%; } /* Top candle right */
+        .c5 { top: 89.2%; left: 79.2%; } /* Back bottom candle right */
+        .c6 { top: 87.2%; left: 86.5%; } /* Front bottom candle right */
+
+        @keyframes flicker {
+            0% { transform: scale(0.9) rotate(-1deg); opacity: 0.8; }
+            100% { transform: scale(1.1) rotate(1deg); opacity: 1; }
+        }
+
+        /* Fix for very small screens */
+        @media (max-width: 480px) {
+            .flame-wrapper { width: 5%; height: 7%; }
         }
     </style>
 </head>
@@ -73,63 +89,59 @@
 
     <canvas id="dust-canvas"></canvas>
 
-    <div class="stage">
-        <!-- Make sure the filename matches exactly -->
-        <img src="invitation.jpg" alt="Invitation" class="invitation-img">
+    <div class="invitation-box">
+        <!-- Kept name as invitation.jpg -->
+        <img src="invitation.jpg" alt="Wedding Invitation" class="invitation-img">
         
-        <div class="flame c1"></div>
-        <div class="flame c2"></div>
-        <div class="flame c3"></div>
-        <div class="flame c4"></div>
-        <div class="flame c5"></div>
-        <div class="flame c6"></div>
+        <!-- Flames tied to the image box -->
+        <div class="flame-wrapper c1"><div class="flame-core"></div></div>
+        <div class="flame-wrapper c2"><div class="flame-core"></div></div>
+        <div class="flame-wrapper c3"><div class="flame-core"></div></div>
+        <div class="flame-wrapper c4"><div class="flame-core"></div></div>
+        <div class="flame-wrapper c5"><div class="flame-core"></div></div>
+        <div class="flame-wrapper c6"><div class="flame-core"></div></div>
     </div>
 
     <script>
         const canvas = document.getElementById('dust-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        const count = 250; // High density for visibility
 
-        function resize() {
+        function init() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<250; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2.5 + 0.5,
+                    vx: Math.random() * 0.4 - 0.2,
+                    vy: Math.random() * 0.5 + 0.2,
+                    o: Math.random()
+                });
+            }
         }
-        window.onresize = resize;
-        resize();
 
-        class Mote {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3 + 1; // Bigger motes
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = Math.random() * 0.4 + 0.2;
-                this.a = Math.random();
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.y > canvas.height) this.y = -10;
-                // Twinkle effect
-                this.a = Math.sin(Date.now() * 0.002 + this.x) * 0.3 + 0.5;
-            }
-            draw() {
-                ctx.fillStyle = `rgba(255, 255, 220, ${this.a})`;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if(p.y > canvas.height) p.y = -10;
+                
+                // Visible golden dust
+                ctx.fillStyle = `rgba(255, 248, 200, ${p.o})`;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();
-            }
+            });
+            requestAnimationFrame(draw);
         }
 
-        for(let i=0; i<count; i++) particles.push(new Mote());
-
-        function loop() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(loop);
-        }
-        loop();
+        window.addEventListener('resize', init);
+        init();
+        draw();
     </script>
 </body>
 </html>
