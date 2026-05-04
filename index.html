@@ -1,154 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wedding Invitation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Invitation - Bahy & Basma</title>
+    <style>
+        :root {
+            --bg-color: #fdfaf3; /* Matches the warm cream tone of the card */
+        }
 
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            overflow: hidden; /* Prevents scrolling for a clean app-like feel */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'serif';
+        }
 
-    .wrapper {
-      position: relative;
-      width: 1024px;
-      height: 1792px;
-      transform-origin: top center;
-    }
+        /* Container that keeps the aspect ratio of your image */
+        .invitation-wrapper {
+            position: relative;
+            max-width: 100%;
+            max-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
+        }
 
-    .background {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+        .invitation-img {
+            max-width: 100%;
+            max-height: 100vh;
+            display: block;
+            object-fit: contain;
+        }
 
-    .flame {
-      position: absolute;
-      width: 14px;
-      height: 28px;
-      background: radial-gradient(ellipse at center, #fff 0%, #ffd27a 40%, #ff8c00 70%, transparent 100%);
-      border-radius: 50%;
-      transform-origin: center bottom;
-      animation: flame 0.9s infinite ease-in-out alternate;
-      mix-blend-mode: screen;
-    }
+        /* The Dust Overlay */
+        #dust-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicking through to the image */
+            z-index: 2;
+        }
 
-    @keyframes flame {
-      0% { transform: scale(1) rotate(-2deg); }
-      50% { transform: scale(1.2) rotate(2deg); }
-      100% { transform: scale(0.9) rotate(-1deg); }
-    }
+        /* Flame/Glow Effects */
+        .glow-point {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 230, 150, 0.6);
+            filter: blur(8px);
+            animation: flicker 3s infinite ease-in-out;
+            z-index: 3;
+            pointer-events: none;
+        }
 
-    .glow {
-      position: absolute;
-      width: 70px;
-      height: 70px;
-      background: radial-gradient(circle, rgba(255,180,80,0.8) 0%, rgba(255,140,0,0.3) 50%, transparent 80%);
-      border-radius: 50%;
-      animation: glow 1.5s infinite alternate ease-in-out;
-      mix-blend-mode: screen;
-    }
+        /* Positioning the glows over the candles in the image 
+           Values are in % so they scale with the image */
+        .candle-1 { bottom: 12%; left: 19%; }
+        .candle-2 { bottom: 8%; left: 15%; }
+        .candle-3 { bottom: 16%; left: 18.5%; }
+        .candle-4 { bottom: 17%; right: 18.5%; }
+        .candle-5 { bottom: 9%; right: 21%; }
+        .candle-6 { bottom: 11%; right: 14%; }
 
-    @keyframes glow {
-      0% { opacity: 0.6; transform: scale(0.9); }
-      100% { opacity: 1; transform: scale(1.2); }
-    }
+        @keyframes flicker {
+            0%, 100% { transform: scale(1); opacity: 0.5; filter: blur(8px); }
+            50% { transform: scale(1.3); opacity: 0.9; filter: blur(12px); box-shadow: 0 0 20px #fff7d1; }
+            70% { transform: scale(0.9); opacity: 0.6; }
+        }
 
-    .sun {
-      position: absolute;
-      width: 280px;
-      height: 280px;
-      background: radial-gradient(circle, rgba(255,220,150,0.7) 0%, transparent 70%);
-      border-radius: 50%;
-      animation: sun 6s infinite ease-in-out;
-      mix-blend-mode: screen;
-    }
-
-    @keyframes sun {
-      0% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.3); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 0.5; }
-    }
-
-  </style>
+        /* Mobile specific adjustments */
+        @media (max-width: 600px) {
+            .invitation-wrapper {
+                width: 100vw;
+                height: 100vh;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="wrapper" id="wrapper">
 
-    <img src="Invitation_1.jpeg" class="background" />
+    <div class="invitation-wrapper">
+        <!-- Main Invitation Image -->
+        <img src="invitation.jpg" alt="Wedding Invitation" class="invitation-img">
 
-    <!-- Sun -->
-    <div class="sun" id="sun"></div>
+        <!-- Particle Canvas for Dust -->
+        <canvas id="dust-canvas"></canvas>
 
-  </div>
+        <!-- Flame Glows -->
+        <div class="glow-point candle-1"></div>
+        <div class="glow-point candle-2"></div>
+        <div class="glow-point candle-3"></div>
+        <div class="glow-point candle-4"></div>
+        <div class="glow-point candle-5"></div>
+        <div class="glow-point candle-6"></div>
+    </div>
 
-  <script>
-    const wrapper = document.getElementById('wrapper');
+    <script>
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
 
-    // Candle positions defined as % (relative to image) → this is the "dynamic" part
-    const candles = [
-      { x: 0.145, y: 0.83 },
-      { x: 0.215, y: 0.80 },
-      { x: 0.78, y: 0.83 },
-      { x: 0.72, y: 0.78 }
-    ];
+        let particles = [];
+        const particleCount = 40;
 
-    function createCandle(x, y) {
-      const flame = document.createElement('div');
-      flame.className = 'flame';
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
 
-      const glow = document.createElement('div');
-      glow.className = 'glow';
+        window.addEventListener('resize', resize);
+        resize();
 
-      const posX = x * 1024;
-      const posY = y * 1792;
+        class Particle {
+            constructor() {
+                this.init();
+            }
 
-      flame.style.left = posX + 'px';
-      flame.style.top = posY + 'px';
+            init() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 + 0.1; // Drift downwards
+                this.opacity = Math.random() * 0.5;
+            }
 
-      glow.style.left = (posX - 28) + 'px';
-      glow.style.top = (posY - 30) + 'px';
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-      wrapper.appendChild(glow);
-      wrapper.appendChild(flame);
-    }
+                if (this.y > canvas.height) this.y = -10;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+            }
 
-    candles.forEach(c => createCandle(c.x, c.y));
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-    // Sun positioning dynamically
-    const sun = document.getElementById('sun');
-    const sunX = 0.88 * 1024;
-    const sunY = 0.38 * 1792;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
 
-    sun.style.left = (sunX - 140) + 'px';
-    sun.style.top = (sunY - 140) + 'px';
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
 
-    // Scaling logic
-    function scaleToFit() {
-      const imgWidth = 1024;
-      const imgHeight = 1792;
-
-      const scaleX = window.innerWidth / imgWidth;
-      const scaleY = window.innerHeight / imgHeight;
-      const scale = Math.min(scaleX, scaleY);
-
-      wrapper.style.transform = scale < 1 ? `scale(${scale})` : 'scale(1)';
-    }
-
-    window.addEventListener('resize', scaleToFit);
-    window.addEventListener('load', scaleToFit);
-
-  </script>
-
+        animate();
+    </script>
 </body>
 </html>
