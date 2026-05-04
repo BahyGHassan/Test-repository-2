@@ -31,7 +31,6 @@
       left: 0;
     }
 
-    /* Flame */
     .flame {
       position: absolute;
       width: 14px;
@@ -49,7 +48,6 @@
       100% { transform: scale(0.9) rotate(-1deg); }
     }
 
-    /* Glow */
     .glow {
       position: absolute;
       width: 70px;
@@ -65,7 +63,6 @@
       100% { opacity: 1; transform: scale(1.2); }
     }
 
-    /* Sun */
     .sun {
       position: absolute;
       width: 280px;
@@ -90,47 +87,67 @@
 
     <img src="Invitation_1.jpeg" class="background" />
 
-    <!-- Sun aligned -->
-    <div class="sun" style="top: 640px; right: 110px;"></div>
-
-    <!-- LEFT candles (precisely aligned) -->
-    <div class="flame" style="left: 150px; bottom: 300px;"></div>
-    <div class="glow" style="left: 135px; bottom: 290px;"></div>
-
-    <div class="flame" style="left: 220px; bottom: 320px;"></div>
-    <div class="glow" style="left: 205px; bottom: 310px;"></div>
-
-    <!-- RIGHT candles -->
-    <div class="flame" style="right: 180px; bottom: 300px;"></div>
-    <div class="glow" style="right: 165px; bottom: 290px;"></div>
-
-    <div class="flame" style="right: 250px; bottom: 330px;"></div>
-    <div class="glow" style="right: 235px; bottom: 320px;"></div>
+    <!-- Sun -->
+    <div class="sun" id="sun"></div>
 
   </div>
 
   <script>
+    const wrapper = document.getElementById('wrapper');
+
+    // Candle positions defined as % (relative to image) → this is the "dynamic" part
+    const candles = [
+      { x: 0.145, y: 0.83 },
+      { x: 0.215, y: 0.80 },
+      { x: 0.78, y: 0.83 },
+      { x: 0.72, y: 0.78 }
+    ];
+
+    function createCandle(x, y) {
+      const flame = document.createElement('div');
+      flame.className = 'flame';
+
+      const glow = document.createElement('div');
+      glow.className = 'glow';
+
+      const posX = x * 1024;
+      const posY = y * 1792;
+
+      flame.style.left = posX + 'px';
+      flame.style.top = posY + 'px';
+
+      glow.style.left = (posX - 28) + 'px';
+      glow.style.top = (posY - 30) + 'px';
+
+      wrapper.appendChild(glow);
+      wrapper.appendChild(flame);
+    }
+
+    candles.forEach(c => createCandle(c.x, c.y));
+
+    // Sun positioning dynamically
+    const sun = document.getElementById('sun');
+    const sunX = 0.88 * 1024;
+    const sunY = 0.38 * 1792;
+
+    sun.style.left = (sunX - 140) + 'px';
+    sun.style.top = (sunY - 140) + 'px';
+
+    // Scaling logic
     function scaleToFit() {
-      const wrapper = document.getElementById('wrapper');
       const imgWidth = 1024;
       const imgHeight = 1792;
 
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-
-      const scaleX = screenWidth / imgWidth;
-      const scaleY = screenHeight / imgHeight;
+      const scaleX = window.innerWidth / imgWidth;
+      const scaleY = window.innerHeight / imgHeight;
       const scale = Math.min(scaleX, scaleY);
 
-      if (scale < 1) {
-        wrapper.style.transform = `scale(${scale})`;
-      } else {
-        wrapper.style.transform = "scale(1)";
-      }
+      wrapper.style.transform = scale < 1 ? `scale(${scale})` : 'scale(1)';
     }
 
     window.addEventListener('resize', scaleToFit);
     window.addEventListener('load', scaleToFit);
+
   </script>
 
 </body>
