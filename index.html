@@ -6,7 +6,7 @@
     <title>Wedding Invitation - Bahy & Basma</title>
     <style>
         :root {
-            --bg-color: #fdfaf3; /* Matches the warm cream tone of the card */
+            --bg-color: #f6f1e7; 
         }
 
         body, html {
@@ -15,14 +15,23 @@
             width: 100%;
             height: 100%;
             background-color: var(--bg-color);
-            overflow: hidden; /* Prevents scrolling for a clean app-like feel */
+            overflow: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'serif';
         }
 
-        /* Container that keeps the aspect ratio of your image */
+        /* The Dust Overlay: Fixed to viewport so zoom doesn't affect it */
+        #dust-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10; /* Keeps it on top of everything */
+        }
+
         .invitation-wrapper {
             position: relative;
             max-width: 100%;
@@ -30,7 +39,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 60px rgba(0,0,0,0.15);
         }
 
         .invitation-img {
@@ -40,64 +49,41 @@
             object-fit: contain;
         }
 
-        /* The Dust Overlay */
-        #dust-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Allows clicking through to the image */
-            z-index: 2;
-        }
-
-        /* Flame/Glow Effects */
+        /* Flame Glows - scaled with the image container */
         .glow-point {
             position: absolute;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: rgba(255, 230, 150, 0.6);
-            filter: blur(8px);
-            animation: flicker 3s infinite ease-in-out;
-            z-index: 3;
+            width: 2%; 
+            height: 2%;
+            background: radial-gradient(circle, rgba(255,240,180,0.9) 0%, rgba(255,180,50,0) 70%);
+            filter: blur(4px);
+            animation: flicker 2s infinite ease-in-out;
+            z-index: 5;
             pointer-events: none;
         }
 
-        /* Positioning the glows over the candles in the image 
-           Values are in % so they scale with the image */
-        .candle-1 { bottom: 12%; left: 19%; }
-        .candle-2 { bottom: 8%; left: 15%; }
-        .candle-3 { bottom: 16%; left: 18.5%; }
-        .candle-4 { bottom: 17%; right: 18.5%; }
-        .candle-5 { bottom: 9%; right: 21%; }
-        .candle-6 { bottom: 11%; right: 14%; }
+        /* Adjusted positions for Invitation_1.jpeg */
+        .candle-1 { bottom: 13%; left: 18.5%; }
+        .candle-2 { bottom: 8.5%; left: 14.8%; }
+        .candle-3 { bottom: 16.5%; left: 18.2%; }
+        .candle-4 { bottom: 17.5%; right: 18.2%; }
+        .candle-5 { bottom: 9.5%; right: 21.2%; }
+        .candle-6 { bottom: 11.5%; right: 14%; }
 
         @keyframes flicker {
-            0%, 100% { transform: scale(1); opacity: 0.5; filter: blur(8px); }
-            50% { transform: scale(1.3); opacity: 0.9; filter: blur(12px); box-shadow: 0 0 20px #fff7d1; }
-            70% { transform: scale(0.9); opacity: 0.6; }
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 600px) {
-            .invitation-wrapper {
-                width: 100vw;
-                height: 100vh;
-            }
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.4); opacity: 0.8; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Canvas is now outside the wrapper for global movement -->
+    <canvas id="dust-canvas"></canvas>
+
     <div class="invitation-wrapper">
-        <!-- Main Invitation Image -->
-        <img src="invitation.jpg" alt="Wedding Invitation" class="invitation-img">
+        <img src="Invitation_1.jpeg" alt="Wedding Invitation" class="invitation-img">
 
-        <!-- Particle Canvas for Dust -->
-        <canvas id="dust-canvas"></canvas>
-
-        <!-- Flame Glows -->
+        <!-- Glowing flames -->
         <div class="glow-point candle-1"></div>
         <div class="glow-point candle-2"></div>
         <div class="glow-point candle-3"></div>
@@ -111,11 +97,12 @@
         const ctx = canvas.getContext('2d');
 
         let particles = [];
-        const particleCount = 40;
+        // Increased count and changed size for better visibility
+        const particleCount = 60; 
 
         function resize() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
         window.addEventListener('resize', resize);
@@ -129,10 +116,13 @@
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 + 0.1; // Drift downwards
-                this.opacity = Math.random() * 0.5;
+                // Larger particles
+                this.size = Math.random() * 2.5 + 0.8; 
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.3 + 0.1;
+                // Higher opacity range for "Golden Hour" feel
+                this.opacity = Math.random() * 0.6 + 0.2; 
+                this.color = `rgba(255, 245, 210, ${this.opacity})`;
             }
 
             update() {
@@ -145,7 +135,9 @@
             }
 
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "white";
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
