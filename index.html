@@ -3,94 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wedding Invitation - Bahy & Basma</title>
+    <title>Wedding Invitation</title>
     <style>
-        :root {
-            --bg-color: #f6f1e7; 
-            --flame-color: rgba(255, 200, 100, 0.8);
-        }
-
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            overflow: hidden; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #f6f1e7;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
+        /* The Dust Overlay - Global */
         #dust-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 20; 
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 100;
         }
 
-        .invitation-container {
+        /* Container that scales perfectly with the image */
+        .stage {
             position: relative;
-            max-width: 100%;
-            max-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 60px rgba(0,0,0,0.2);
+            display: inline-block;
+            line-height: 0; /* Removes bottom gap */
+            max-height: 95vh;
+            max-width: 95vw;
         }
 
         .invitation-img {
-            max-width: 100%;
-            max-height: 100vh;
+            max-height: 95vh;
+            max-width: 95vw;
             display: block;
             object-fit: contain;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.3);
         }
 
-        /* Improved Flame Effect */
+        /* The Flame Element */
         .flame {
             position: absolute;
-            width: 12px;
-            height: 18px;
-            background: radial-gradient(circle at bottom, var(--flame-color) 0%, rgba(255,255,255,0) 80%);
-            filter: blur(2px);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            animation: flicker 1.5s infinite alternate ease-in-out;
-            z-index: 5;
+            width: 1.2%; /* Relative to image width */
+            height: 2.5%; /* Relative to image height */
+            background: #fff;
+            border-radius: 50% 50% 20% 20% / 80% 80% 20% 20%;
+            z-index: 10;
+            /* Multi-layered glow for high visibility */
+            box-shadow: 
+                0 0 10px #fff,
+                0 -5px 15px #ffcf54,
+                0 -10px 20px #ff8000;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
+            animation: move-flame 1s infinite alternate ease-in-out;
+            transform-origin: bottom;
         }
 
-        /* Bright center of the flame to make it pop */
-        .flame::after {
-            content: '';
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 6px;
-            background: white;
-            border-radius: 50%;
-            filter: blur(1px);
-            box-shadow: 0 0 10px 2px #fffad1;
-        }
+        /* Exact coordinates for image_486963.jpg */
+        .c1 { bottom: 18.2%; left: 18.2%; } 
+        .c2 { bottom: 10.4%; left: 14.5%; } 
+        .c3 { bottom: 21.6%; left: 18.1%; }
+        .c4 { bottom: 21.3%; right: 17.8%; }
+        .c5 { bottom: 10.8%; right: 20.8%; }
+        .c6 { bottom: 12.8%; right: 13.5%; }
 
-        /* Precise positioning for the 6 candles in Invitation_1.jpeg */
-        .c1 { bottom: 18.2%; left: 18.3%; } /* Left middle */
-        .c2 { bottom: 10.3%; left: 14.5%; } /* Left bottom */
-        .c3 { bottom: 21.8%; left: 18%; }   /* Left top */
-        .c4 { bottom: 21.3%; right: 17.8%; } /* Right top */
-        .c5 { bottom: 10.8%; right: 20.8%; } /* Right bottom back */
-        .c6 { bottom: 12.8%; right: 13.5%; } /* Right bottom front */
-
-        @keyframes flicker {
-            0% { transform: scale(0.9) rotate(-2deg); opacity: 0.7; }
-            20% { transform: scale(1.1) rotate(1deg); opacity: 1; }
-            40% { transform: scale(0.95) rotate(-1deg); opacity: 0.8; }
-            60% { transform: scale(1.05) rotate(2deg); opacity: 0.9; }
-            80% { transform: scale(1) rotate(-1deg); opacity: 1; }
-            100% { transform: scale(1.1) rotate(0deg); opacity: 0.8; }
+        @keyframes move-flame {
+            0% { transform: scaleY(1) rotate(-1deg); }
+            100% { transform: scaleY(1.2) rotate(1deg); }
         }
     </style>
 </head>
@@ -98,10 +73,10 @@
 
     <canvas id="dust-canvas"></canvas>
 
-    <div class="invitation-container">
-        <img src="invitation.jpg" alt="Wedding Invitation" class="invitation-img">
-
-        <!-- Flame elements -->
+    <div class="stage">
+        <!-- Make sure the filename matches exactly -->
+        <img src="image_486963.jpg" alt="Invitation" class="invitation-img">
+        
         <div class="flame c1"></div>
         <div class="flame c2"></div>
         <div class="flame c3"></div>
@@ -113,68 +88,48 @@
     <script>
         const canvas = document.getElementById('dust-canvas');
         const ctx = canvas.getContext('2d');
-
         let particles = [];
-        const particleCount = 180; // Triple the density
+        const count = 250; // High density for visibility
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-
-        window.addEventListener('resize', resize);
+        window.onresize = resize;
         resize();
 
-        class Particle {
+        class Mote {
             constructor() {
-                this.init();
-            }
-
-            init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = Math.random() * 0.3 - 0.15;
-                this.speedY = Math.random() * 0.4 + 0.1;
-                this.opacity = Math.random() * 0.7 + 0.1;
-                this.shimmer = Math.random() * 0.05;
+                this.size = Math.random() * 3 + 1; // Bigger motes
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = Math.random() * 0.4 + 0.2;
+                this.a = Math.random();
             }
-
             update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                
-                // Add a slight shimmer effect
-                this.opacity += this.shimmer;
-                if (this.opacity > 0.8 || this.opacity < 0.1) this.shimmer *= -1;
-
+                this.x += this.vx;
+                this.y += this.vy;
                 if (this.y > canvas.height) this.y = -10;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
+                // Twinkle effect
+                this.a = Math.sin(Date.now() * 0.002 + this.x) * 0.3 + 0.5;
             }
-
             draw() {
-                ctx.fillStyle = `rgba(255, 250, 220, ${this.opacity})`;
+                ctx.fillStyle = `rgba(255, 255, 220, ${this.a})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
+        for(let i=0; i<count; i++) particles.push(new Mote());
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animate);
+        function loop() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(loop);
         }
-
-        animate();
+        loop();
     </script>
 </body>
 </html>
